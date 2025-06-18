@@ -34,14 +34,17 @@ class CategoryApiController
     // Lấy danh sách danh mục (không yêu cầu đăng nhập)
     public function index()
     {
+        ob_clean();
         header('Content-Type: application/json');
         $categories = $this->categoryModel->getcategory();
         echo json_encode($categories);
+        exit;
     }
 
     // Lấy thông tin danh mục theo ID (không yêu cầu đăng nhập)
     public function show($id)
     {
+        ob_clean();
         header('Content-Type: application/json');
         $category = $this->categoryModel->getCategoryById($id);
         if ($category) {
@@ -50,6 +53,7 @@ class CategoryApiController
             http_response_code(404);
             echo json_encode(['message' => 'Category not found']);
         }
+        exit;
     }
 
     // Thêm danh mục mới

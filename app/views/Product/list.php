@@ -1,13 +1,25 @@
 <?php include 'app/views/shares/header.php'; ?>
 <h1>Danh sách sản phẩm</h1>
-<a href="/hoangduyminh/Product/add" class="btn btn-success mb-2">Thêm sản phẩm mới</a>
+<a href="/webbanhang/Product/add" class="btn btn-success mb-2">Thêm sản phẩm mới</a>
 <ul class="list-group" id="product-list">
     <!-- Danh sách sản phẩm sẽ được tải từ API và hiển thị tại đây -->
 </ul>
 <?php include 'app/views/shares/footer.php'; ?>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        fetch('/hoangduyminh/api/product')
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            alert('Vui lòng đăng nhập');
+            location.href = '/webbanhang/account/login'; // Điều hướng đến trang đăng nhập
+            return;
+        }
+        fetch('/webbanhang/api/product', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 const productList = document.getElementById('product-list');
@@ -16,11 +28,11 @@
                     productItem.className = 'list-group-item';
                     productItem.innerHTML = `
 <h2><a
-href="/hoangduyminh/Product/show/${product.id}">${product.name}</a></h2>
+href="/webbanhang/Product/show/${product.id}">${product.name}</a></h2>
 <p>${product.description}</p>
 <p>Giá: ${product.price} VND</p>
 <p>Danh mục: ${product.category_name}</p>
-<a href="/hoangduyminh/Product/edit/${product.id}" class="btn btnwarning">Sửa</a>
+<a href="/webbanhang/Product/edit/${product.id}" class="btn btnwarning">Sửa</a>
 <button class="btn btn-danger"
 onclick="deleteProduct(${product.id})">Xóa</button>
 `;
@@ -30,7 +42,7 @@ onclick="deleteProduct(${product.id})">Xóa</button>
     });
     function deleteProduct(id) {
         if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-            fetch(`/hoangduyminh/api/product/${id}`, {
+            fetch(`/webbanhang/api/product/${id}`, {
                 method: 'DELETE'
             })
                 .then(response => response.json())

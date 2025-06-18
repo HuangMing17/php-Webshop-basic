@@ -2,21 +2,43 @@
 require_once('app/config/database.php');
 require_once('app/models/ProductModel.php');
 require_once('app/models/CategoryModel.php');
+require_once('app/utils/JWTHandler.php'); //
 class ProductApiController
 {
     private $productModel;
     private $db;
+    private $jwtHandler; //
     public function __construct()
     {
         $this->db = (new Database())->getConnection();
         $this->productModel = new ProductModel($this->db);
+        $this->jwtHandler = new JWTHandler(); //
+    }
+    private function authenticate()
+    {
+        $headers = apache_request_headers();
+        if (isset($headers['Authorization'])) {
+            $authHeader = $headers['Authorization'];
+            $arr = explode(" ", $authHeader);
+            $jwt = $arr[1] ?? null;
+            if ($jwt) {
+                $decoded = $this->jwtHandler->decode($jwt);
+                return $decoded ? true : false;
+            }
+        }
+        return false;
     }
     // Lấy danh sách sản phẩm
     public function index()
     {
-        header('Content-Type: application/json');
-        $products = $this->productModel->getProducts();
-        echo json_encode($products);
+        if ($this->authenticate()) {
+            header('Content-Type: application/json');
+            $products = $this->productModel->getProducts();
+            echo json_encode($products);
+        } else {
+            http_response_code(401);
+            echo json_encode(['message' => 'Unauthorized']);
+        }
     }
     // Lấy thông tin sản phẩm theo ID
     public function show($id)
@@ -39,9 +61,13 @@ class ProductApiController
         $description = $data['description'] ?? '';
         $price = $data['price'] ?? '';
         $category_id = $data['category_id'] ?? null;
-        $soluong = $data['SoLuong'] ??'';
-        $image = $data['image'] ??'';
-        $result = $this->productModel->addProduct($name, $description,  $price, $category_id, $image,$soluong);
+        $result = $this->productModel->addProduct(
+            $name,
+            $description,
+            $price,
+            $category_id,
+            null
+        );
         if (is_array($result)) {
             http_response_code(400);
             echo json_encode(['errors' => $result]);
@@ -59,9 +85,14 @@ class ProductApiController
         $description = $data['description'] ?? '';
         $price = $data['price'] ?? '';
         $category_id = $data['category_id'] ?? null;
-        $soluong = $data['SoLuong'] ??'';
-        $image = $data['image'] ??'';
-        $result = $this->productModel->updateProduct($id, $name, $description, $price, $category_id,$image,$soluong);
+        $result = $this->productModel->updateProduct(
+            $id,
+            $name,
+            $description,
+            $price,
+            $category_id,
+            null
+        );
         if ($result) {
             echo json_encode(['message' => 'Product updated successfully']);
         } else {

@@ -1,60 +1,173 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sản phẩm</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .product-image {
-            max-width: 100px;
-            height: auto;
-        }
-    </style>
+    <title>TechPhone Store - Cửa hàng điện thoại uy tín</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Quản lý sản phẩm</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" datatarget="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle
-navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/webbanhang/Product/">Danh sách sản
-                        phẩm</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/webbanhang/Product/add">Thêm sản
-                        phẩm</a>
-                </li>
-                <li class="nav-item" id="nav-login">
-                    <a class="nav-link" href="/webbanhang/account/login">Login</a>
-                </li>
-                <li class="nav-item" id="nav-logout" style="display: none;">
-                    <a class="nav-link" href="#" onclick="logout()">Logout</a>
-                </li>
-            </ul>
+    <!-- Top Bar -->
+    <div class="bg-dark text-white py-2">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <small><i class="fas fa-phone"></i> Hotline: 1900-123-456 | <i class="fas fa-envelope"></i> info@techphone.vn</small>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small>Miễn phí vận chuyển toàn quốc với đơn hàng > 500k</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="/hoangduyminh/Product/home">
+                <i class="fas fa-mobile-alt me-2"></i>TechPhone Store
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hoangduyminh/Product/home">
+                            <i class="fas fa-home me-1"></i>Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-mobile-alt me-1"></i>Sản phẩm
+                        </a>
+                        <ul class="dropdown-menu" id="category-dropdown">
+                            <li><a class="dropdown-item" href="/hoangduyminh/Product/home">Tất cả sản phẩm</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <!-- Categories will be loaded here -->
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hoangduyminh/Product/cart">
+                            <i class="fas fa-shopping-cart me-1"></i>Giỏ hàng
+                            <span class="badge bg-danger ms-1" id="cart-count">0</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <!-- Admin Menu - Hidden by default -->
+                    <li class="nav-item dropdown" id="admin-menu" style="display: none;">
+                        <a class="nav-link dropdown-toggle text-danger" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog me-1"></i>Quản trị
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/hoangduyminh/Product/add">
+                                <i class="fas fa-plus me-2"></i>Thêm sản phẩm
+                            </a></li>
+                            <li><a class="dropdown-item" href="/hoangduyminh/Product/">
+                                <i class="fas fa-list me-2"></i>Quản lý sản phẩm
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/hoangduyminh/Category/add">
+                                <i class="fas fa-plus me-2"></i>Thêm danh mục
+                            </a></li>
+                            <li><a class="dropdown-item" href="/hoangduyminh/Category/list">
+                                <i class="fas fa-tags me-2"></i>Quản lý danh mục
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item" id="nav-login">
+                        <a class="nav-link btn btn-outline-primary ms-2" href="/hoangduyminh/account/login">
+                            <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" id="nav-user" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i><span id="username-display"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-history me-2"></i>Lịch sử mua hàng
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function logout() {
             localStorage.removeItem('jwtToken');
-            location.href = '/webbanhang/account/login';
+            sessionStorage.removeItem('userRole');
+            sessionStorage.removeItem('username');
+            location.href = '/hoangduyminh/account/login';
         }
-        document.addEventListener("DOMContentLoaded", function () {
+
+        function checkUserRole() {
             const token = localStorage.getItem('jwtToken');
-            if (token) {
+            const userRole = sessionStorage.getItem('userRole');
+            const username = sessionStorage.getItem('username');
+            
+            if (token && username) {
+                // User is logged in
                 document.getElementById('nav-login').style.display = 'none';
-                document.getElementById('nav-logout').style.display = 'block';
+                document.getElementById('nav-user').style.display = 'block';
+                document.getElementById('username-display').textContent = username;
+                
+                // Show admin menu if user is admin
+                if (userRole === 'admin') {
+                    document.getElementById('admin-menu').style.display = 'block';
+                }
             } else {
+                // User is not logged in
                 document.getElementById('nav-login').style.display = 'block';
-                document.getElementById('nav-logout').style.display = 'none';
+                document.getElementById('nav-user').style.display = 'none';
+                document.getElementById('admin-menu').style.display = 'none';
             }
+        }
+
+        function loadCategories() {
+            fetch('/hoangduyminh/api/category')
+                .then(response => response.json())
+                .then(categories => {
+                    const dropdown = document.getElementById('category-dropdown');
+                    categories.forEach(category => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<a class="dropdown-item" href="/hoangduyminh/Product/home?category=${category.id}">
+                            <i class="fas fa-mobile-alt me-2"></i>${category.name}
+                        </a>`;
+                        dropdown.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error loading categories:', error));
+        }
+
+        function updateCartCount() {
+            // Update cart count from session storage or API
+            const cart = JSON.parse(sessionStorage.getItem('cart') || '{}');
+            const count = Object.values(cart).reduce((total, item) => total + (item.quantity || 0), 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            checkUserRole();
+            loadCategories();
+            updateCartCount();
         });
     </script>
-    <div class="container mt-4"></div>

@@ -1,54 +1,194 @@
 <?php include 'app/views/shares/header.php'; ?>
 <h1>Sửa sản phẩm</h1>
-<?php if (!empty($errors)): ?>
-    <div class="alert alert-danger">
-        <ul>
-            <?php foreach ($errors as $error): ?>
-                <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-<?php endif; ?>
-<form method="POST" action="/hoangduyminh/Product/update" enctype="multipart/form-data"
-    onsubmit="return validateForm();">
-    <input type="hidden" name="id" value="<?php echo $product->id; ?>">
+<div id="error-messages" class="alert alert-danger" style="display: none;">
+    <ul id="error-list"></ul>
+</div>
+<div id="success-message" class="alert alert-success" style="display: none;"></div>
+
+<form id="edit-product-form" enctype="multipart/form-data">
+    <input type="hidden" id="product-id" name="id">
     <div class="form-group">
         <label for="name">Tên sản phẩm:</label>
-        <input type="text" id="name" name="name" class="form-control" value="<?php
-        echo htmlspecialchars($product->name, ENT_QUOTES, 'UTF-8'); ?>" required>
+        <input type="text" id="name" name="name" class="form-control" required>
     </div>
     <div class="form-group">
         <label for="description">Mô tả:</label>
-        <textarea id="description" name="description" class="form-control" required><?php echo htmlspecialchars($product->description, ENT_QUOTES, 'UTF-8');
-        ?></textarea>
+        <textarea id="description" name="description" class="form-control" required></textarea>
     </div>
     <div class="form-group">
         <label for="price">Giá:</label>
-        <input type="number" id="price" name="price" class="form-control" step="0.01"
-            value="<?php echo htmlspecialchars($product->price, ENT_QUOTES, 'UTF-8'); ?>" required>
+        <input type="number" id="price" name="price" class="form-control" step="0.01" required>
+    </div>
+    <div class="form-group">
+        <label for="SoLuong">Số lượng:</label>
+        <input type="number" id="SoLuong" name="SoLuong" class="form-control" min="1" required>
     </div>
     <div class="form-group">
         <label for="category_id">Danh mục:</label>
         <select id="category_id" name="category_id" class="form-control" required>
-            <?php foreach ($categories as $category): ?>
-                <option value="<?php echo $category->id; ?>" <?php echo $category->id
-                       == $product->category_id ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($category->name, ENT_QUOTES, 'UTF-8');
-                    ?>
-                </option>
-            <?php endforeach; ?>
+            <option value="">Chọn danh mục...</option>
         </select>
     </div>
     <div class="form-group">
         <label for="image">Hình ảnh:</label>
-        <input type="file" id="image" name="image" class="form-control">
-        <input type="hidden" name="existing_image" value="<?php echo $product->image;
-        ?>">
-        <?php if ($product->image): ?>
-            <img src="/<?php echo $product->image; ?>" alt="Product Image" style="maxwidth: 100px;">
-        <?php endif; ?>
+        <input type="file" id="image" name="image" class="form-control" accept="image/*">
+        <div id="current-image" class="mt-2"></div>
     </div>
     <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
 </form>
-<a href="/hoangduyminh/Product/list" class="btn btn-secondary mt-2">Quay lại danh sách sản phẩm</a>
+<a href="/hoangduyminh/Product/" class="btn btn-secondary mt-2">Quay lại danh sách sản phẩm</a>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('Vui lòng đăng nhập để sửa sản phẩm');
+        location.href = '/hoangduyminh/account/login';
+        return;
+    }
+
+    // Get product ID from URL
+    const urlPath = window.location.pathname;
+    const productId = urlPath.split('/').pop();
+    
+    if (!productId) {
+        alert('ID sản phẩm không hợp lệ');
+        location.href = '/hoangduyminh/Product/';
+        return;
+    }
+
+    document.getElementById('product-id').value = productId;
+
+    // Load categories and product data
+    loadCategories();
+    loadProduct(productId);
+
+    // Handle form submission
+    document.getElementById('edit-product-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        updateProduct();
+    });
+});
+
+function loadCategories() {
+    fetch('/hoangduyminh/api/category', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(categories => {
+        const categorySelect = document.getElementById('category_id');
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Error loading categories:', error);
+        showError(['Không thể tải danh mục']);
+    });
+}
+
+function loadProduct(productId) {
+    fetch(`/hoangduyminh/api/product/${productId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(product => {
+        if (product.message && product.message === 'Product not found') {
+            alert('Không tìm thấy sản phẩm');
+            location.href = '/hoangduyminh/Product/';
+            return;
+        }
+
+        // Fill form with product data
+        document.getElementById('name').value = product.name || '';
+        document.getElementById('description').value = product.description || '';
+        document.getElementById('price').value = product.price || '';
+        document.getElementById('SoLuong').value = product.SoLuong || 1;
+        document.getElementById('category_id').value = product.category_id || '';
+
+        // Show current image if exists
+        if (product.image) {
+            document.getElementById('current-image').innerHTML =
+                `<p>Hình ảnh hiện tại:</p><img src="/hoangduyminh/${product.image}" alt="Current Image" style="max-width: 100px;">`;
+        }
+    })
+    .catch(error => {
+        console.error('Error loading product:', error);
+        showError(['Không thể tải thông tin sản phẩm']);
+    });
+}
+
+function updateProduct() {
+    const token = localStorage.getItem('jwtToken');
+    const productId = document.getElementById('product-id').value;
+    
+    const productData = {
+        name: document.getElementById('name').value,
+        description: document.getElementById('description').value,
+        price: parseFloat(document.getElementById('price').value),
+        SoLuong: parseInt(document.getElementById('SoLuong').value),
+        category_id: parseInt(document.getElementById('category_id').value)
+    };
+
+    fetch(`/hoangduyminh/api/product/${productId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(productData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Product updated successfully') {
+            showSuccess('Sản phẩm đã được cập nhật thành công!');
+            setTimeout(() => {
+                location.href = '/hoangduyminh/Product/';
+            }, 2000);
+        } else {
+            showError([data.message || 'Có lỗi xảy ra khi cập nhật sản phẩm']);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError(['Có lỗi xảy ra khi cập nhật sản phẩm']);
+    });
+}
+
+function showError(errors) {
+    const errorDiv = document.getElementById('error-messages');
+    const errorList = document.getElementById('error-list');
+    const successDiv = document.getElementById('success-message');
+    
+    successDiv.style.display = 'none';
+    errorList.innerHTML = '';
+    
+    errors.forEach(error => {
+        const li = document.createElement('li');
+        li.textContent = error;
+        errorList.appendChild(li);
+    });
+    
+    errorDiv.style.display = 'block';
+}
+
+function showSuccess(message) {
+    const errorDiv = document.getElementById('error-messages');
+    const successDiv = document.getElementById('success-message');
+    
+    errorDiv.style.display = 'none';
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+}
+</script>
+
 <?php include 'app/views/shares/footer.php'; ?>

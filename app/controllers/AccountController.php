@@ -52,7 +52,7 @@ class AccountController
                 $password = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
                 $result = $this->accountModel->save($username, $fullName, $password);
                 if ($result) {
-                    header('Location: /webbanhang/account/login');
+                    header('Location: /hoangduyminh/account/login');
                 }
             }
         }
@@ -61,7 +61,7 @@ class AccountController
     {
         unset($_SESSION['username']);
         unset($_SESSION['role']);
-        header('Location: /webbanhang/product');
+        header('Location: /hoangduyminh/product');
     }
     public function checkLogin()
     {

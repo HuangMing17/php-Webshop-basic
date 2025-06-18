@@ -46,7 +46,7 @@
         formData.forEach((value, key) => {
             jsonData[key] = value;
         });
-        fetch('/webbanhang/account/checkLogin', {
+        fetch('/hoangduyminh/account/checkLogin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -57,7 +57,7 @@
             .then(data => {
                 if (data.token) {
                     localStorage.setItem('jwtToken', data.token);
-                    location.href = '/webbanhang/Product';
+                    location.href = '/hoangduyminh/Product';
                 } else {
                     alert('Đăng nhập thất bại');
                 }

@@ -55,18 +55,27 @@ class ProductApiController
     // Thêm sản phẩm mới
     public function store()
     {
+        if (!$this->authenticate()) {
+            http_response_code(401);
+            echo json_encode(['message' => 'Unauthorized']);
+            return;
+        }
+
         header('Content-Type: application/json');
         $data = json_decode(file_get_contents("php://input"), true);
         $name = $data['name'] ?? '';
         $description = $data['description'] ?? '';
         $price = $data['price'] ?? '';
         $category_id = $data['category_id'] ?? null;
+        $SoLuong = $data['SoLuong'] ?? 1;
+        
         $result = $this->productModel->addProduct(
             $name,
             $description,
             $price,
             $category_id,
-            null
+            null, // image
+            $SoLuong
         );
         if (is_array($result)) {
             http_response_code(400);
@@ -79,19 +88,28 @@ class ProductApiController
     // Cập nhật sản phẩm theo ID
     public function update($id)
     {
+        if (!$this->authenticate()) {
+            http_response_code(401);
+            echo json_encode(['message' => 'Unauthorized']);
+            return;
+        }
+
         header('Content-Type: application/json');
         $data = json_decode(file_get_contents("php://input"), true);
         $name = $data['name'] ?? '';
         $description = $data['description'] ?? '';
         $price = $data['price'] ?? '';
         $category_id = $data['category_id'] ?? null;
+        $SoLuong = $data['SoLuong'] ?? 1;
+        
         $result = $this->productModel->updateProduct(
             $id,
             $name,
             $description,
             $price,
             $category_id,
-            null
+            null, // image
+            $SoLuong
         );
         if ($result) {
             echo json_encode(['message' => 'Product updated successfully']);

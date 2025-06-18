@@ -93,25 +93,14 @@ function addProduct() {
         formData.append('image', imageFile);
     }
 
-    // Since the API expects JSON, we need to convert FormData to JSON for text fields
-    // But for file upload, we need a different approach - let's use the traditional form submission for now
-    // and modify the API to handle form data
-    
-    const productData = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        price: parseFloat(document.getElementById('price').value),
-        SoLuong: parseInt(document.getElementById('SoLuong').value),
-        category_id: parseInt(document.getElementById('category_id').value)
-    };
-
+    // Use FormData to support file upload
     fetch('/hoangduyminh/api/product', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
+            // Don't set Content-Type, let browser set it with boundary for FormData
         },
-        body: JSON.stringify(productData)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {

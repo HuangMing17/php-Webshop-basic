@@ -116,6 +116,9 @@
             localStorage.removeItem('jwtToken');
             sessionStorage.removeItem('userRole');
             sessionStorage.removeItem('username');
+            sessionStorage.removeItem('fullname');
+            sessionStorage.removeItem('userId');
+            sessionStorage.removeItem('cart');
             location.href = '/hoangduyminh/account/login';
         }
 
@@ -123,16 +126,22 @@
             const token = localStorage.getItem('jwtToken');
             const userRole = sessionStorage.getItem('userRole');
             const username = sessionStorage.getItem('username');
+            const fullname = sessionStorage.getItem('fullname');
             
             if (token && username) {
                 // User is logged in
                 document.getElementById('nav-login').style.display = 'none';
                 document.getElementById('nav-user').style.display = 'block';
-                document.getElementById('username-display').textContent = username;
+                
+                // Display fullname if available, otherwise username
+                const displayName = fullname && fullname.trim() ? fullname : username;
+                document.getElementById('username-display').textContent = displayName;
                 
                 // Show admin menu if user is admin
                 if (userRole === 'admin') {
                     document.getElementById('admin-menu').style.display = 'block';
+                } else {
+                    document.getElementById('admin-menu').style.display = 'none';
                 }
             } else {
                 // User is not logged in
@@ -144,8 +153,23 @@
 
         function loadCategories() {
             fetch('/hoangduyminh/api/category')
-                .then(response => response.json())
+                .then(response => {
+                    return response.text().then(text => {
+                        // Clean any FFF prefix
+                        let cleanText = text;
+                        if (text.startsWith('FFF')) {
+                            cleanText = text.substring(3);
+                        }
+                        try {
+                            return JSON.parse(cleanText);
+                        } catch (e) {
+                            console.error('Failed to parse JSON:', cleanText);
+                            throw new Error('Invalid JSON response');
+                        }
+                    });
+                })
                 .then(categories => {
+                    console.log('Header categories loaded:', categories); // Debug log
                     const dropdown = document.getElementById('category-dropdown');
                     categories.forEach(category => {
                         const li = document.createElement('li');

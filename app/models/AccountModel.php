@@ -133,5 +133,15 @@ class AccountModel
         $stmt->bindParam(":id", $id);
         return $stmt->execute();
     }
+
+    // Đếm số lượng admin accounts
+    public function countAdminAccounts()
+    {
+        $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " WHERE role = 'admin'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result->count;
+    }
 }
 ?>

@@ -36,8 +36,23 @@ function loadCategory(categoryId) {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(category => {
+        console.log('Category loaded:', category); // Debug log
         if (category.message && category.message === 'Category not found') {
             showError('Không tìm thấy danh mục!');
             return;
@@ -101,8 +116,23 @@ function deleteCategory(categoryId, categoryName) {
             'Authorization': 'Bearer ' + token
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(data => {
+        console.log('Delete category response:', data); // Debug log
         if (data.message === 'Category deleted successfully') {
             alert('Danh mục đã được xóa thành công!');
             location.href = '/hoangduyminh/Category/list';

@@ -56,8 +56,23 @@ function addCategory() {
         },
         body: JSON.stringify(categoryData)
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(data => {
+        console.log('Add category response:', data); // Debug log
         if (data.message === 'Category created successfully') {
             showSuccess('Danh mục đã được thêm thành công!');
             document.getElementById('add-category-form').reset();

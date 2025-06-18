@@ -131,21 +131,33 @@ function updateProduct() {
     const token = localStorage.getItem('jwtToken');
     const productId = document.getElementById('product-id').value;
     
-    const productData = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        price: parseFloat(document.getElementById('price').value),
-        SoLuong: parseInt(document.getElementById('SoLuong').value),
-        category_id: parseInt(document.getElementById('category_id').value)
-    };
+    const formData = new FormData();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('description', document.getElementById('description').value);
+    formData.append('price', document.getElementById('price').value);
+    formData.append('SoLuong', document.getElementById('SoLuong').value);
+    formData.append('category_id', document.getElementById('category_id').value);
+    
+    // Add existing image path if no new image is selected
+    const imageFile = document.getElementById('image').files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    } else {
+        // Keep existing image if available
+        const currentImageSrc = document.querySelector('#current-image img');
+        if (currentImageSrc) {
+            const imagePath = currentImageSrc.src.replace('/hoangduyminh/', '');
+            formData.append('existing_image', imagePath);
+        }
+    }
 
     fetch(`/hoangduyminh/api/product/${productId}`, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
+            // Don't set Content-Type for FormData
         },
-        body: JSON.stringify(productData)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {

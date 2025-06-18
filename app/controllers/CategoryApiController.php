@@ -31,7 +31,7 @@ class CategoryApiController
         return false;
     }
 
-    // Lấy danh sách danh mục
+    // Lấy danh sách danh mục (không yêu cầu đăng nhập)
     public function index()
     {
         header('Content-Type: application/json');
@@ -39,7 +39,7 @@ class CategoryApiController
         echo json_encode($categories);
     }
 
-    // Lấy thông tin danh mục theo ID
+    // Lấy thông tin danh mục theo ID (không yêu cầu đăng nhập)
     public function show($id)
     {
         header('Content-Type: application/json');

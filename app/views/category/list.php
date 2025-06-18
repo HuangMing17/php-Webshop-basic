@@ -30,8 +30,23 @@ function loadCategories() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(categories => {
+        console.log('Categories loaded:', categories); // Debug log
         document.getElementById('loading').style.display = 'none';
         
         if (categories.length === 0) {
@@ -95,8 +110,23 @@ function deleteCategory(categoryId, categoryName) {
             'Authorization': 'Bearer ' + token
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(data => {
+        console.log('Delete category response:', data); // Debug log
         if (data.message === 'Category deleted successfully') {
             // Reload categories after successful deletion
             loadCategories();

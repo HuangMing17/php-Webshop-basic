@@ -77,8 +77,23 @@ function loadCategories() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(categories => {
+        console.log('Categories loaded:', categories); // Debug log
         const categorySelect = document.getElementById('category_id');
         categories.forEach(category => {
             const option = document.createElement('option');
@@ -100,8 +115,23 @@ function loadProduct(productId) {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(product => {
+        console.log('Product loaded:', product); // Debug log
         if (product.message && product.message === 'Product not found') {
             alert('Không tìm thấy sản phẩm');
             location.href = '/hoangduyminh/Product/';
@@ -127,40 +157,64 @@ function loadProduct(productId) {
     });
 }
 
-function updateProduct() {
+async function updateProduct() {
     const token = localStorage.getItem('jwtToken');
     const productId = document.getElementById('product-id').value;
     
-    const formData = new FormData();
-    formData.append('name', document.getElementById('name').value);
-    formData.append('description', document.getElementById('description').value);
-    formData.append('price', document.getElementById('price').value);
-    formData.append('SoLuong', document.getElementById('SoLuong').value);
-    formData.append('category_id', document.getElementById('category_id').value);
+    let imagePath = null;
     
-    // Add existing image path if no new image is selected
+    // Step 1: Upload new image if selected
     const imageFile = document.getElementById('image').files[0];
     if (imageFile) {
-        formData.append('image', imageFile);
+        try {
+            imagePath = await uploadImageFirst(imageFile, token);
+        } catch (error) {
+            showError(['Lỗi khi upload hình ảnh: ' + error.message]);
+            return;
+        }
     } else {
         // Keep existing image if available
         const currentImageSrc = document.querySelector('#current-image img');
         if (currentImageSrc) {
-            const imagePath = currentImageSrc.src.replace('/hoangduyminh/', '');
-            formData.append('existing_image', imagePath);
+            imagePath = currentImageSrc.src.replace('/hoangduyminh/', '');
         }
     }
+    
+    // Step 2: Update product with JSON data
+    const productData = {
+        name: document.getElementById('name').value,
+        description: document.getElementById('description').value,
+        price: parseFloat(document.getElementById('price').value),
+        SoLuong: parseInt(document.getElementById('SoLuong').value),
+        category_id: parseInt(document.getElementById('category_id').value),
+        existing_image: imagePath
+    };
 
     fetch(`/hoangduyminh/api/product/${productId}`, {
         method: 'PUT',
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
-            // Don't set Content-Type for FormData
         },
-        body: formData
+        body: JSON.stringify(productData)
     })
-    .then(response => response.json())
+    .then(response => {
+        return response.text().then(text => {
+            // Clean any FFF prefix
+            let cleanText = text;
+            if (text.startsWith('FFF')) {
+                cleanText = text.substring(3);
+            }
+            try {
+                return JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse JSON:', cleanText);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(data => {
+        console.log('Update product response:', data); // Debug log
         if (data.message === 'Product updated successfully') {
             showSuccess('Sản phẩm đã được cập nhật thành công!');
             setTimeout(() => {
@@ -174,6 +228,33 @@ function updateProduct() {
         console.error('Error:', error);
         showError(['Có lỗi xảy ra khi cập nhật sản phẩm']);
     });
+}
+
+async function uploadImageFirst(imageFile, token) {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    const response = await fetch('/hoangduyminh/api/product/upload-image', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        body: formData
+    });
+    
+    const text = await response.text();
+    let cleanText = text;
+    if (text.startsWith('FFF')) {
+        cleanText = text.substring(3);
+    }
+    
+    const data = JSON.parse(cleanText);
+    
+    if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+    }
+    
+    return data.image_path;
 }
 
 function showError(errors) {

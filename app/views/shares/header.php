@@ -53,7 +53,7 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/hoangduyminh/Product/cart">
+                        <a class="nav-link" href="/hoangduyminh/Cart/cart">
                             <i class="fas fa-shopping-cart me-1"></i>Giỏ hàng
                             <span class="badge bg-danger ms-1" id="cart-count">0</span>
                         </a>
@@ -67,19 +67,32 @@
                             <i class="fas fa-cog me-1"></i>Quản trị
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/hoangduyminh/Product/add">
-                                <i class="fas fa-plus me-2"></i>Thêm sản phẩm
+                            <li><h6 class="dropdown-header text-primary">
+                                <i class="fas fa-box me-2"></i>Quản lý sản phẩm
+                          
                             </a></li>
                             <li><a class="dropdown-item" href="/hoangduyminh/Product/">
-                                <i class="fas fa-list me-2"></i>Quản lý sản phẩm
+                                <i class="fas fa-list me-2"></i>Danh sách sản phẩm
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/hoangduyminh/Category/add">
-                                <i class="fas fa-plus me-2"></i>Thêm danh mục
+                            
+                            <li><h6 class="dropdown-header text-success">
+                                <i class="fas fa-tags me-2"></i>Quản lý danh mục
+                            </h6></li>
+                            
                             </a></li>
                             <li><a class="dropdown-item" href="/hoangduyminh/Category/list">
-                                <i class="fas fa-tags me-2"></i>Quản lý danh mục
+                                <i class="fas fa-folder-open me-2"></i>Danh sách danh mục
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <li><h6 class="dropdown-header text-warning">
+                                <i class="fas fa-users me-2"></i>Quản lý tài khoản
+                            </h6></li>
+                            <li><a class="dropdown-item" href="/hoangduyminh/account/list">
+                                <i class="fas fa-users-cog me-2"></i>Danh sách tài khoản
+                            </a></li>
+                            
                         </ul>
                     </li>
                     

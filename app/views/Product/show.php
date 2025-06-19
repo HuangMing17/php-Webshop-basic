@@ -162,11 +162,11 @@ function displayProduct(product) {
                     
                     <!-- Action Buttons -->
                     <div class="d-grid gap-3 d-md-flex">
-                        ${inStock ? 
+                        ${inStock ?
                             `<button class="btn btn-danger btn-lg flex-fill" onclick="addToCart(${product.id})">
                                 <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
                              </button>
-                             <button class="btn btn-success btn-lg flex-fill">
+                             <button class="btn btn-success btn-lg flex-fill" onclick="buyNow(${product.id})">
                                 <i class="fas fa-bolt me-2"></i>Mua ngay
                              </button>` :
                             `<button class="btn btn-secondary btn-lg flex-fill" disabled>
@@ -290,6 +290,21 @@ function addToCart(productId) {
     
     // Show success message
     showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+}
+
+function buyNow(productId) {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    // Add to cart first
+    const cart = JSON.parse(sessionStorage.getItem('cart') || '{}');
+    cart[productId] = { quantity: quantity };
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Update cart count
+    updateCartCount();
+    
+    // Redirect to checkout
+    window.location.href = '/hoangduyminh/Cart/checkout';
 }
 
 function showToast(message, type = 'info') {

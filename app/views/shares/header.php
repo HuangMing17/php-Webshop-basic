@@ -106,8 +106,11 @@
                             <i class="fas fa-user me-1"></i><span id="username-display"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">
+                            <li><a class="dropdown-item" href="/hoangduyminh/account/profile">
                                 <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                            </a></li>
+                            <li><a class="dropdown-item" href="/hoangduyminh/account/edit">
+                                <i class="fas fa-edit me-2"></i>Chỉnh sửa tài khoản
                             </a></li>
                             <li><a class="dropdown-item" href="#">
                                 <i class="fas fa-history me-2"></i>Lịch sử mua hàng

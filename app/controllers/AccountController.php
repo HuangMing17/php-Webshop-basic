@@ -230,7 +230,7 @@ class AccountController
         header('Location: /hoangduyminh/account/list');
     }
     
-    // Phương thức để tạo tài khoản admin mới
+   
     
         
         

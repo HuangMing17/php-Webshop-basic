@@ -133,7 +133,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function loadCategories() {
     fetch('/hoangduyminh/api/category')
-        .then(response => response.json())
+        .then(response => {
+            return response.text().then(text => {
+                // Clean any FFF prefix
+                let cleanText = text;
+                if (text.startsWith('FFF')) {
+                    cleanText = text.substring(3);
+                }
+                try {
+                    return JSON.parse(cleanText);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', cleanText);
+                    throw new Error('Invalid JSON response');
+                }
+            });
+        })
         .then(categories => {
             allCategories = categories;
             displayCategoryFilters(categories);
@@ -157,7 +171,21 @@ function displayCategoryFilters(categories) {
 
 function loadProducts() {
     fetch('/hoangduyminh/api/product')
-        .then(response => response.json())
+        .then(response => {
+            return response.text().then(text => {
+                // Clean any FFF prefix
+                let cleanText = text;
+                if (text.startsWith('FFF')) {
+                    cleanText = text.substring(3);
+                }
+                try {
+                    return JSON.parse(cleanText);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', cleanText);
+                    throw new Error('Invalid JSON response');
+                }
+            });
+        })
         .then(products => {
             document.getElementById('loading').style.display = 'none';
             allProducts = products;
@@ -232,10 +260,10 @@ function createProductCard(product) {
                         <small class="text-muted">${product.category_name || 'Chưa phân loại'}</small>
                     </div>
                     <div class="d-grid gap-2">
-                        ${inStock ? 
-                            `<a href="/hoangduyminh/Product/addToCart/${product.id}" class="btn btn-primary">
+                        ${inStock ?
+                            `<button class="btn btn-primary" onclick="addToCart(${product.id})">
                                 <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
-                             </a>` :
+                             </button>` :
                             `<button class="btn btn-secondary" disabled>
                                 <i class="fas fa-times me-1"></i>Hết hàng
                              </button>`
@@ -307,6 +335,57 @@ function escapeHtml(text) {
 function formatPrice(price) {
     return new Intl.NumberFormat('vi-VN').format(price);
 }
+
+function addToCart(productId) {
+    // Add to cart using sessionStorage (client-side cart)
+    const cart = JSON.parse(sessionStorage.getItem('cart') || '{}');
+    if (cart[productId]) {
+        cart[productId].quantity += 1;
+    } else {
+        cart[productId] = { quantity: 1 };
+    }
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Update cart count in header
+    updateCartCount();
+    
+    // Show success notification
+    showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+}
+
+function updateCartCount() {
+    // Update cart count from sessionStorage
+    const cart = JSON.parse(sessionStorage.getItem('cart') || '{}');
+    const count = Object.values(cart).reduce((total, item) => total + (item.quantity || 0), 0);
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+// Initialize cart count on page load
+document.addEventListener("DOMContentLoaded", function() {
+    updateCartCount();
+});
 </script>
 
 <style>

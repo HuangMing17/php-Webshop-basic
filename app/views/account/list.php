@@ -8,11 +8,11 @@
 
         <div class="card-body">
             <div class="d-flex justify-content-between mb-3">
-                <a href="<?php echo BASE_URL; ?>product" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Quay lại
+                <a href="/hoangduyminh/Product/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
-                <a href="<?php echo BASE_URL; ?>account/register" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Thêm tài khoản mới
+                <a href="/hoangduyminh/account/register" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Thêm tài khoản mới
                 </a>
             </div>
 
@@ -39,18 +39,54 @@
                                     <td><?php echo $account->id; ?></td>
                                     <td class="text-center">
                                         <?php
-                                        // Xử lý đường dẫn avatar
-                                        $avatarPath = !empty($account->avatar)
-                                            ? (strpos($account->avatar, 'http') === 0 ? $account->avatar : BASE_URL . $account->avatar)
-                                            : BASE_URL . DEFAULT_AVATAR;
+                                        // Debug: In ra giá trị avatar để kiểm tra
+                                        // echo "<!-- Avatar DB: " . htmlspecialchars($account->avatar ?? 'NULL') . " -->";
+                                        
+                                        // Xử lý đường dẫn avatar an toàn
+                                        $defaultAvatar = '/hoangduyminh/images/default-avatar.png'; // Đổi path cho phù hợp
+                                        
+                                        if (!empty($account->avatar)) {
+                                            $avatar = trim($account->avatar);
+                                            
+                                            // Case 1: Đã là URL đầy đủ (http/https)
+                                            if (preg_match('/^https?:\/\//', $avatar)) {
+                                                $avatarPath = $avatar;
+                                            }
+                                            // Case 2: Đã có prefix /hoangduyminh/
+                                            elseif (strpos($avatar, '/hoangduyminh/') === 0) {
+                                                $avatarPath = $avatar;
+                                            }
+                                            // Case 3: Có prefix hoangduyminh/ (không có /)
+                                            elseif (strpos($avatar, 'hoangduyminh/') === 0) {
+                                                $avatarPath = '/' . $avatar;
+                                            }
+                                            // Case 4: Relative path từ public
+                                            elseif (strpos($avatar, 'public/') === 0) {
+                                                $avatarPath = '/hoangduyminh/' . $avatar;
+                                            }
+                                            // Case 5: Relative path từ uploads
+                                            elseif (strpos($avatar, 'uploads/') === 0) {
+                                                $avatarPath = '/hoangduyminh/public/' . $avatar;
+                                            }
+                                            // Case 6: Chỉ là filename hoặc path khác
+                                            else {
+                                                $avatarPath = '/hoangduyminh/public/uploads/avatars/' . basename($avatar);
+                                            }
+                                        } else {
+                                            $avatarPath = $defaultAvatar;
+                                        }
+                                        
+                                        // Clean up double slashes nếu có
+                                        $avatarPath = preg_replace('#/+#', '/', $avatarPath);
                                         ?>
                                         <img src="<?php echo $avatarPath; ?>"
                                             alt="Avatar của <?php echo htmlspecialchars($account->username); ?>"
                                             class="img-thumbnail avatar-thumbnail"
                                             style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
-                                            onerror="this.src='<?php echo BASE_URL . DEFAULT_AVATAR; ?>'"
-                                            title="<?php echo htmlspecialchars($account->username); ?>" data-toggle="modal"
-                                            data-target="#avatarModal"
+                                            onerror="this.src='/hoangduyminh/images/default-avatar.png'"
+                                            title="<?php echo htmlspecialchars($account->username); ?>"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#avatarModal"
                                             onclick="showAvatarModal(this.src, '<?php echo htmlspecialchars($account->username); ?>')">
                                     </td>
                                     <td><?php echo htmlspecialchars($account->username); ?></td>
@@ -67,13 +103,13 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <a href="<?php echo BASE_URL; ?>account/edit/<?php echo $account->id; ?>"
+                                            <a href="/hoangduyminh/account/edit/<?php echo $account->id; ?>"
                                                 class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil-square"></i> Sửa
+                                                <i class="fas fa-edit"></i> Sửa
                                             </a>
                                             <a href="#" onclick="confirmDelete(<?php echo $account->id; ?>)"
                                                 class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Xóa
+                                                <i class="fas fa-trash"></i> Xóa
                                             </a>
                                         </div>
                                     </td>
@@ -92,18 +128,15 @@
 </div>
 
 <!-- Modal để hiển thị ảnh avatar kích thước lớn -->
-<div class="modal fade" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="avatarModalLabel">Ảnh đại diện</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <img src="" id="modalAvatarImg" class="img-fluid" alt="Avatar">
+                <img src="" id="modalAvatarImg" class="img-fluid rounded" alt="Avatar" style="max-height: 400px;">
             </div>
         </div>
     </div>
@@ -124,13 +157,17 @@
 <script>
     function confirmDelete(id) {
         if (confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) {
-            window.location.href = '<?php echo BASE_URL; ?>account/delete/' + id;
+            window.location.href = '/hoangduyminh/account/delete/' + id;
         }
     }
 
     function showAvatarModal(src, username) {
         document.getElementById('modalAvatarImg').src = src;
         document.getElementById('avatarModalLabel').textContent = 'Ảnh đại diện của ' + username;
+        
+        // Show modal using Bootstrap 5
+        const modal = new bootstrap.Modal(document.getElementById('avatarModal'));
+        modal.show();
     }
 </script>
 
